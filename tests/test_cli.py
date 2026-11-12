@@ -9,6 +9,23 @@ import unittest
 from cli import main
 
 class CliTests(unittest.TestCase):
+    def test_csv_credit_totals_match_json_for_eligible_and_ineligible_terms(self):
+        listing = json.loads((Path(__file__).resolve().parents[1] / 'fee-lab.json').read_text())[0]
+        listing['credits'] = [{'label': 'Lease credit', 'amount': '500.00', 'minimum_months': 12}]
+        source = json.dumps([listing])
+        for months, expected in ((12, '500.00'), (6, '0.00')):
+            with self.subTest(months=months):
+                args = ['--input', '-', '--months', str(months)]
+                code, output, error = self.run_cli(args, source)
+                self.assertEqual(code, 0, error)
+                cost = json.loads(output)['listings'][0]['cost']
+                code, output, error = self.run_cli([*args, '--format', 'csv'], source)
+                self.assertEqual(code, 0, error)
+                row = next(csv.DictReader(io.StringIO(output)))
+                self.assertEqual(row['eligible_credit_total'], expected)
+                self.assertEqual(row['eligible_credit_total'], cost['credit_total'])
+                self.assertEqual(row['lease_expense_known'], cost['total'])
+
     def run_cli(self,args,source=''):
         output,error=io.StringIO(),io.StringIO()
         code=main(args,io.StringIO(source),output,error)

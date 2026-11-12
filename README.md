@@ -9,6 +9,8 @@ A source-aware rental decision dashboard and local booking simulation, created N
 
 ## Run
 
+Comparison CSV exports append `eligible_credit_total`, the exact USD credit amount already deducted from `lease_expense_known`. Credits that do not meet the selected lease term contribute `0.00`. Existing columns retain their order; JSON output and cost calculations are unchanged.
+
 Requires Python 3.10+; no packages, credentials or installation needed.
 
 ```powershell
