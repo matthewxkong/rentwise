@@ -15,9 +15,9 @@ def comparison_export(results,format='json'):
     if format!='csv':raise ValueError('Export format must be json or csv')
     output=io.StringIO(newline='')
     writer=csv.writer(output)
-    writer.writerow(['id','name','kind','currency','months','monthly_known','lease_expense_known','deposit_refundable','cash_outlay_known','price_complete','unknown_fees','source','observed_at','source_excerpt'])
+    writer.writerow(['id','name','kind','currency','months','monthly_known','lease_expense_known','deposit_refundable','cash_outlay_known','price_complete','unknown_fees','source','observed_at','source_excerpt','eligible_credit_total'])
     for item in results:
         c=item['cost']
-        row=[item['id'],item['name'],item['kind'],c.get('currency','USD'),c['months'],c['monthly'],c['total'],c.get('refundable_deposits','0.00'),c.get('cash_outlay',c['total']),c['complete'],'; '.join(c['unknown']),item['source'],item['observed_at'],item['excerpt']]
+        row=[item['id'],item['name'],item['kind'],c.get('currency','USD'),c['months'],c['monthly'],c['total'],c.get('refundable_deposits','0.00'),c.get('cash_outlay',c['total']),c['complete'],'; '.join(c['unknown']),item['source'],item['observed_at'],item['excerpt'],c.get('credit_total','0.00')]
         writer.writerow([spreadsheet_cell(v) for v in row])
     return output.getvalue()
