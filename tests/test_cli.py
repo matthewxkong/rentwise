@@ -24,6 +24,17 @@ class CliTests(unittest.TestCase):
         self.assertEqual(len(rows),4)
         self.assertEqual(rows[0]['id'],'juniper-room')
 
+    def test_piped_utf8_matches_file_input_with_ascii_console(self):
+        import os
+        root = Path(__file__).resolve().parents[1]
+        data = json.loads((root / 'data.json').read_bytes())
+        data[0]['name'] = 'Caf\u00e9'
+        result = subprocess.run([sys.executable, str(root / 'cli.py'), '--input', '-'],
+                                input=json.dumps(data, ensure_ascii=False).encode('utf-8'),
+                                env={**os.environ, 'PYTHONIOENCODING': 'ascii'}, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(data[0]['name'], [item['name'] for item in json.loads(result.stdout)['listings']])
+
     def test_stdin_rejects_bad_shapes_and_duplicate_fields(self):
         for source in ['null','{}','[]','[{"id":"one","id":"two"}]']:
             code,output,error=self.run_cli(['--input','-'],source)
