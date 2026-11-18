@@ -8,7 +8,7 @@ from exports import comparison_export
 
 def main(argv=None,stdin=None,stdout=None,stderr=None):
     stdin,stdout,stderr=stdin or sys.stdin,stdout or sys.stdout,stderr or sys.stderr
-    if hasattr(stdout,'reconfigure'):stdout.reconfigure(encoding='utf-8')
+    if hasattr(stdout,'reconfigure'):stdout.reconfigure(encoding='utf-8', newline='')
     if hasattr(stderr,'reconfigure'):stderr.reconfigure(encoding='utf-8')
     parser=argparse.ArgumentParser(description='Evaluate synthetic or user-provided USD rental listings')
     parser.add_argument('--input',default=str(Path(__file__).with_name('data.json')),help='Listing JSON file, or - for stdin')
@@ -27,7 +27,9 @@ def main(argv=None,stdin=None,stdout=None,stderr=None):
         if len(raw.encode('utf-8'))>100000:raise ValueError('Input exceeds 100 KB')
         listing_data=parse_json(raw)
         result=evaluate(listing_data,{'budget':args.budget,'kind':args.kind,'months':args.months,'optional':args.optional,'known_only':args.known_only,'sort':args.sort})
-        stdout.write(comparison_export(result['results'],args.format)+'\n')
+        stdout.write(comparison_export(result['results'], args.format))
+        if args.format == 'json':
+            stdout.write('\n')
         return 0
     except (OSError,ValueError,TypeError,UnicodeError) as exc:
         stderr.write('Rentwise: '+str(exc)+'\n')
