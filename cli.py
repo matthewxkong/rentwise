@@ -21,7 +21,11 @@ def main(argv=None,stdin=None,stdout=None,stderr=None):
     parser.add_argument('--sort',choices=['total','monthly','effective','completeness'],default='total')
     args=parser.parse_args(argv)
     try:
-        if args.input=='-':raw=stdin.read(100001)
+        if args.input == '-':
+            if hasattr(stdin, 'buffer'):
+                raw = stdin.buffer.read(100001).decode('utf-8')
+            else:
+                raw = stdin.read(100001)
         else:
             with Path(args.input).open('rb') as source:raw=source.read(100001).decode('utf-8')
         if len(raw.encode('utf-8'))>100000:raise ValueError('Input exceeds 100 KB')
