@@ -24,6 +24,14 @@ class CliTests(unittest.TestCase):
         self.assertEqual(len(rows),4)
         self.assertEqual(rows[0]['id'],'juniper-room')
 
+    def test_redirected_csv_has_no_empty_records(self):
+        root = Path(__file__).resolve().parents[1]
+        result = subprocess.run([sys.executable, str(root / 'cli.py'), '--format', 'csv'],
+                                capture_output=True, check=True)
+        rows = list(csv.reader(io.StringIO(result.stdout.decode('utf-8'), newline='')))
+        self.assertEqual(len(rows), 5)
+        self.assertTrue(all(len(row) == len(rows[0]) for row in rows))
+
     def test_stdin_rejects_bad_shapes_and_duplicate_fields(self):
         for source in ['null','{}','[]','[{"id":"one","id":"two"}]']:
             code,output,error=self.run_cli(['--input','-'],source)
