@@ -39,6 +39,9 @@ def evaluate(listings,preferences=None,today=None):
         else:primary=Decimal(cost['total'])
         return primary,not cost['complete'],Decimal(cost['total']),item['id']
     results.sort(key=order)
-    for item in results:item['ranking']['basis']={'total':'known lease expense','monthly':'known recurring monthly cost','effective':'exact effective monthly expense','completeness':'explicit price completeness'}[mode]+' ascending; deterministic price and ID tie-breaks'
+    basis = {'total': 'known lease expense', 'monthly': 'known recurring monthly cost',
+             'effective': 'exact effective monthly expense', 'completeness': 'explicit price completeness'}[mode]
+    for item in results:
+        item['ranking']['basis'] = basis + ' ascending; deterministic price and ID tie-breaks'
     for rank,item in enumerate(results,1):item['ranking']['position']=rank
-    return {'results':results,'excluded':excluded,'preferences':preferences,'method':'Deterministic Decimal arithmetic; unknown fees excluded and flagged. Ranking uses known lease expense, not a prediction of final price.'}
+    return {'results':results,'excluded':excluded,'preferences':preferences,'method':f'Deterministic Decimal arithmetic; unknown fees excluded and flagged. Ranking uses {basis}, not a prediction of final price.'}

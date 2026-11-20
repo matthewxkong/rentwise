@@ -17,6 +17,15 @@ class DecisionTests(unittest.TestCase):
         self.assertTrue(result['results'][0]['warnings'])
         self.assertIn('exceeds budget',result['excluded'][0]['reasons'][0])
 
+    def test_method_describes_selected_order_even_when_no_listings_match(self):
+        for mode, phrase in [('total', 'known lease expense'), ('monthly', 'recurring monthly'),
+                             ('effective', 'effective monthly'), ('completeness', 'completeness')]:
+            result = evaluate(self.listings, {'sort': mode})
+            self.assertIn(phrase, result['method'])
+            empty = evaluate(self.listings, {'sort': mode, 'budget': '0'})
+            self.assertEqual(empty['results'], [])
+            self.assertIn(phrase, empty['method'])
+
     def test_ties_are_stable_under_input_reordering(self):
         items=self.listings[:2]
         for item in items:item.update(base='1000',required='0',upfront='0',unknown=[])
